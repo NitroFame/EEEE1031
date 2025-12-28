@@ -1,0 +1,119 @@
+#include <LiquidCrystal.h>
+
+// Motor Pins
+int ENA = 3; 
+int ENB = 11;
+int IN1 = A5;
+int IN2 = A1;
+int IN3 = 12;
+int IN4 = 13;
+
+int echo = A2;
+int trig = A3;
+
+// LCD
+LiquidCrystal lcd(8,9,4,5,6,7); // RS, E, D4, D5, D6, D7 (no need declaration for pins in LCD, due to shield)
+
+void setup(){
+  pinMode(ENA,OUTPUT);
+  pinMode(ENB,OUTPUT);
+  pinMode(IN1,OUTPUT);
+  pinMode(IN2,OUTPUT);
+  pinMode(IN3,OUTPUT);
+  pinMode(IN4,OUTPUT);
+
+  pinMode(trig, OUTPUT);
+  pinMode(echo, INPUT);
+
+  Serial.begin(9600);
+  lcd.begin(16, 2);
+  lcd.clear();
+}
+
+void loop(){
+
+  digitalWrite(trig,LOW); // Ultrasonic Sensor Code
+  delayMicroseconds(2);
+  digitalWrite(trig, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trig,LOW);
+  float HC_Time = pulseIn(echo, HIGH,20000);
+  float distance = (HC_Time * 0.0343)/2;
+  int dst = round(distance);
+
+  float time=millis() / 1000.0;
+
+  lcd.setCursor(0,0);
+  lcd.print("Distance : ");
+  lcd.print(dst);
+  lcd.print("cm  ");
+  lcd.setCursor(0,1);
+  lcd.print("Time : ");
+  lcd.print(time);
+  lcd.print("s     ");
+
+  Serial.print("\nDistance : "); // serial monitor
+  Serial.print(dst);
+  Serial.print("cm");
+  Serial.print("\tTime : ");
+  Serial.print(time);
+  Serial.print("s");
+
+  int spd = 150;
+  int t_spd = 255;
+
+  Forward(spd);
+  if (dst <= 20){
+    STOP();
+    Back(spd);
+    delay(50);
+    Right(t_spd);
+    delay(200);
+  }
+
+}
+
+void Forward(int spd){
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void STOP(){
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, 0);
+  analogWrite(ENB, 0);
+}
+
+void Back(int spd){
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void Left(int spd){
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN2, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
+
+void Right(int spd){
+  digitalWrite(IN1, LOW);  
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN2, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENA, spd);
+  analogWrite(ENB, spd);
+}
