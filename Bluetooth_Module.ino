@@ -1,6 +1,3 @@
-//    WORKS I THINK
-
-
 #include <LiquidCrystal.h>
 
 #define FORWARD 'F'
